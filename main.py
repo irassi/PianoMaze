@@ -10,7 +10,7 @@ PLAY_AREA_WIDTH = 800
 PLAY_AREA_HEIGHT = 450
 
 screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pg.display.set_caption("Testing")
+pg.display.set_caption("PianoMaze")
 
 tile_size = 25
 play_area = pg.Rect(0, 0, PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT)
@@ -22,11 +22,6 @@ for idx, x in enumerate(maze):
     for idy, y in enumerate(x):
         maze[idx, idy] = np.int8(random.randint(0,3)/3)
     
-# for x in maze:
-#     print(x)
-            
-print(maze)
-
 obstacles = []
 for idx, x in enumerate(maze):
     for idy, y in enumerate(x):
@@ -34,13 +29,15 @@ for idx, x in enumerate(maze):
             obstacle = pg.Rect(idx*tile_size, idy*tile_size, tile_size, tile_size)
             obstacles.append(obstacle)
     
+# Draw the piano keys
 wkeys = []
 bkeys = []
+keys_amount = 7
 
-keys_start_w = 275
+keys_start_w = WINDOW_WIDTH / 2 - keys_amount * 33 / 2
 keys_start_h = 470
 
-for i in range(7):
+for i in range(keys_amount):
     wkey_w = keys_start_w + i*33
     wkey_h = keys_start_h
     wkey = pg.Rect(wkey_w, wkey_h, 30, 90)
@@ -49,12 +46,14 @@ for i in range(7):
     bkey_w = keys_start_w + i*33 + 21
     bkey_h = keys_start_h
 
+    # add black keys, not optimized for more than 7 white keys
     if i != 2 and i != 6:
         bkey = pg.Rect(bkey_w, bkey_h, 20, 60)
         bkeys.append(bkey)
 
 
-#COLORS
+
+#Colors
 BG = (50, 50, 50)
 GREEN = (10, 215, 10)
 RED = (215, 10, 10)
@@ -62,6 +61,7 @@ BLUE = (10, 10, 215)
 WHITE = (244, 244, 244)
 BLACK = (10, 10, 10)
 
+#Keyboard
 key_bindings = np.zeros(7)
 key_bindings[0] = pg.K_d
 key_bindings[1] = pg.K_f
@@ -72,9 +72,56 @@ key_bindings[5] = pg.K_k
 key_bindings[6] = pg.K_l
 piano_keys_pressed = np.zeros(7)
 
-uptick = 0
+#Initialize movement ticks
+tick_up = 0
+tick_down = 0
+tick_left = 0
+tick_right = 0
 
-def checkCollision():
+def handle_movement(direction):
+    global tick_up, tick_down, tick_left, tick_right
+    move_speed = 1
+    tick_limit = 10
+
+    if direction == "up":
+        if tick_up == 0:
+            player.move_ip(0, -move_speed)
+            if check_collision():
+                player.move_ip(0, move_speed)
+        tick_up += 1
+        if tick_up >= tick_limit:
+            tick_up = 0
+
+    elif direction == "down":
+        if tick_down == 0:
+            player.move_ip(0, move_speed)
+            if check_collision():
+                player.move_ip(0, -move_speed)
+        tick_down += 1
+        if tick_down >= tick_limit:
+            tick_down = 0
+
+    elif direction == "left":
+        if tick_left == 0:
+            player.move_ip(-move_speed, 0)
+            if check_collision():
+                player.move_ip(move_speed, 0)
+        tick_left += 1
+        if tick_left >= tick_limit:
+            tick_left = 0
+
+    elif direction == "right":
+        if tick_right == 0:
+            player.move_ip(move_speed, 0)
+            if check_collision():
+                player.move_ip(-move_speed, 0)
+        tick_right += 1
+        if tick_right >= tick_limit:
+            tick_right = 0
+
+
+
+def check_collision():
     if player.collidelist(obstacles) >=0 :
         return True
     return False
@@ -123,36 +170,20 @@ while run:
     key = pg.key.get_pressed()
 
     if key[pg.K_LEFT] == True:
-        player.move_ip(-1, 0)
-        if checkCollision():
-            player.move_ip(1, 0)
+        handle_movement("left")
 
     
     if key[pg.K_RIGHT] == True:
-        player.move_ip(1, 0)
-        if checkCollision():
-            player.move_ip(-1, 0)
+        handle_movement("right")
     
     if key[pg.K_UP] == True:
-
-        if uptick == 0:
-            player.move_ip(0, -1)
-            if checkCollision():
-                player.move_ip(0, 1) 
-        uptick += 1
-        if uptick >= 10:
-            uptick = 0
-
-### TODO: movement handler with tick system
-            
+        handle_movement("up")
 
     if key[pg.K_DOWN] == True:
-        player.move_ip(0, 1)
-        if checkCollision():
-            player.move_ip(0, -1)
+        handle_movement("down")
 
     pg.draw.rect(screen, GREEN, player)    
     pg.display.update()
-    print("Uptick: {}".format(uptick))
 
 pg.quit()
+
