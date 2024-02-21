@@ -9,6 +9,8 @@ WINDOW_HEIGHT = 600
 PLAY_AREA_WIDTH = 800
 PLAY_AREA_HEIGHT = 450
 
+clock = pg.time.Clock()
+
 screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pg.display.set_caption("PianoMaze")
 
@@ -72,53 +74,37 @@ key_bindings[5] = pg.K_k
 key_bindings[6] = pg.K_l
 piano_keys_pressed = np.zeros(7)
 
-#Initialize movement ticks
-tick_up = 0
-tick_down = 0
-tick_left = 0
-tick_right = 0
+# #Initialize movement ticks
+# tick_up = 0
+# tick_down = 0
+# tick_left = 0
+# tick_right = 0
 
 def handle_movement(direction):
-    global tick_up, tick_down, tick_left, tick_right
+    # global tick_up, tick_down, tick_left, tick_right
     move_speed = 1
-    tick_limit = 10
+    # tick_limit = 10
 
     if direction == "up":
-        if tick_up == 0:
-            player.move_ip(0, -move_speed)
-            if check_collision():
-                player.move_ip(0, move_speed)
-        tick_up += 1
-        if tick_up >= tick_limit:
-            tick_up = 0
+        player.move_ip(0, -move_speed)
+        if check_collision():
+            player.move_ip(0, move_speed)
 
     elif direction == "down":
-        if tick_down == 0:
-            player.move_ip(0, move_speed)
-            if check_collision():
-                player.move_ip(0, -move_speed)
-        tick_down += 1
-        if tick_down >= tick_limit:
-            tick_down = 0
-
+         player.move_ip(0, move_speed)
+         if check_collision():
+            player.move_ip(0, -move_speed)
+        
     elif direction == "left":
-        if tick_left == 0:
-            player.move_ip(-move_speed, 0)
-            if check_collision():
-                player.move_ip(move_speed, 0)
-        tick_left += 1
-        if tick_left >= tick_limit:
-            tick_left = 0
-
-    elif direction == "right":
-        if tick_right == 0:
+        player.move_ip(-move_speed, 0)
+        if check_collision():
             player.move_ip(move_speed, 0)
-            if check_collision():
-                player.move_ip(-move_speed, 0)
-        tick_right += 1
-        if tick_right >= tick_limit:
-            tick_right = 0
-
+        
+    elif direction == "right":
+        player.move_ip(move_speed, 0)
+        if check_collision():
+            player.move_ip(-move_speed, 0)
+        
 
 
 def check_collision():
@@ -128,6 +114,8 @@ def check_collision():
 
 run = True
 while run:
+
+    clock.tick(60)
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
