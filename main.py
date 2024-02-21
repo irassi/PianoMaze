@@ -9,14 +9,34 @@ WINDOW_HEIGHT = 600
 PLAY_AREA_WIDTH = 800
 PLAY_AREA_HEIGHT = 450
 
+#Colors
+BG = (50, 50, 50)
+GREEN = (10, 215, 10)
+RED = (215, 10, 10)
+BLUE = (10, 10, 215)
+WHITE = (244, 244, 244)
+BLACK = (10, 10, 10)
+DARKNESS = (0, 0, 20)
+
 clock = pg.time.Clock()
 
 screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+
 pg.display.set_caption("PianoMaze")
 
 tile_size = 25
-play_area = pg.Rect(0, 0, PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT)
+play_bg = pg.Rect(0, 0, PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT)
+play_area = pg.Surface((PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT))
+ui_area = pg.Surface((WINDOW_WIDTH, WINDOW_HEIGHT - PLAY_AREA_HEIGHT))
 player = pg.Rect(0, 0, tile_size, tile_size)
+
+#light and darkness
+radius = 50
+cover_surf = pg.Surface((radius*2, radius*2))
+cover_surf.fill(DARKNESS)
+cover_surf.set_colorkey((255, 255, 255))
+pg.draw.circle(cover_surf, (255, 255, 255), (radius, radius), radius)
 
 maze = []
 maze = np.zeros((np.int8(PLAY_AREA_WIDTH/tile_size), np.int8(PLAY_AREA_HEIGHT/tile_size)), dtype=np.int8)
@@ -35,33 +55,28 @@ for idx, x in enumerate(maze):
 wkeys = []
 bkeys = []
 keys_amount = 7
+keys_width = 30
+keys_height = 90
 
 keys_start_w = WINDOW_WIDTH / 2 - keys_amount * 33 / 2
-keys_start_h = 470
+keys_start_h = ui_area.get_height() / 2 - keys_height / 2
 
 for i in range(keys_amount):
-    wkey_w = keys_start_w + i*33
+    wkey_w = keys_start_w + i*(keys_width+2)
     wkey_h = keys_start_h
-    wkey = pg.Rect(wkey_w, wkey_h, 30, 90)
+    wkey = pg.Rect(wkey_w, wkey_h, keys_width, keys_height)
     wkeys.append(wkey)
 
-    bkey_w = keys_start_w + i*33 + 21
-    bkey_h = keys_start_h
+    bkey_w = wkey_w + round(keys_width * 0.667)
+    bkey_h = wkey_h
 
     # add black keys, not optimized for more than 7 white keys
     if i != 2 and i != 6:
-        bkey = pg.Rect(bkey_w, bkey_h, 20, 60)
+        bkey = pg.Rect(bkey_w, bkey_h, round(keys_width * 0.667), round(keys_height * 0.667))
         bkeys.append(bkey)
 
 
 
-#Colors
-BG = (50, 50, 50)
-GREEN = (10, 215, 10)
-RED = (215, 10, 10)
-BLUE = (10, 10, 215)
-WHITE = (244, 244, 244)
-BLACK = (10, 10, 10)
 
 #Keyboard
 key_bindings = np.zeros(7)
@@ -74,16 +89,9 @@ key_bindings[5] = pg.K_k
 key_bindings[6] = pg.K_l
 piano_keys_pressed = np.zeros(7)
 
-# #Initialize movement ticks
-# tick_up = 0
-# tick_down = 0
-# tick_left = 0
-# tick_right = 0
-
 def handle_movement(direction):
-    # global tick_up, tick_down, tick_left, tick_right
+    
     move_speed = 1
-    # tick_limit = 10
 
     if direction == "up":
         player.move_ip(0, -move_speed)
@@ -113,6 +121,7 @@ def check_collision():
     return False
 
 run = True
+
 while run:
 
     clock.tick(60)
@@ -132,27 +141,40 @@ while run:
                     piano_keys_pressed[i] = 0
 
     screen.fill(BG)
-    pg.draw.rect(screen, BG, play_area)
-    pg.draw.line(screen, WHITE, (0,PLAY_AREA_HEIGHT+2), (WINDOW_WIDTH,PLAY_AREA_HEIGHT+2), 3)
+
+    #draw play area
+    play_area.fill(DARKNESS)
+    clip_center = player.center
+    clip_rect = pg.Rect(clip_center[0] - radius, clip_center[1] - radius, radius*2, radius*2)
+    # screen.set_clip(clip_rect)
+    play_area.set_clip(clip_rect)
+
+    # pg.draw.rect(screen, BG, play_area)
+    pg.draw.rect(play_area, BG, play_bg)
 
     #draw player
-    # pg.draw.rect(screen, GREEN, player)
+    pg.draw.rect(play_area, GREEN, player)
 
-    player.clamp_ip(play_area)
+    player.clamp_ip(play_bg)
 
     #draw obstacles
     for obstacle in obstacles:
-        pg.draw.rect(screen, BLUE, obstacle)
+        pg.draw.rect(play_area, BLUE, obstacle)
+
+    #draw UI
+
+    ui_area.fill(BG)
+    pg.draw.line(ui_area, WHITE, (0,0), (WINDOW_WIDTH,0), 3)
 
     #draw pianokeys
     for i, wkey in enumerate(wkeys):
         if piano_keys_pressed[i] == 1:
-            pg.draw.rect(screen, GREEN, wkey)
+            pg.draw.rect(ui_area, GREEN, wkey)
         else:
-            pg.draw.rect(screen, WHITE, wkey)
+            pg.draw.rect(ui_area, WHITE, wkey)
 
     for bkey in bkeys:
-        pg.draw.rect(screen, BLACK, bkey)    
+        pg.draw.rect(ui_area, BLACK, bkey)    
 
     # pg.key.set_repeat(100)
     key = pg.key.get_pressed()
@@ -170,8 +192,13 @@ while run:
     if key[pg.K_DOWN] == True:
         handle_movement("down")
 
-    pg.draw.rect(screen, GREEN, player)    
-    pg.display.update()
+
+    play_area.blit(cover_surf, clip_rect)
+
+    screen.blit(play_area, (0, 0))
+    screen.blit(ui_area, (0, PLAY_AREA_HEIGHT))
+
+    pg.display.flip()
 
 pg.quit()
 
