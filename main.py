@@ -74,7 +74,6 @@ piano_keys_pressed = np.zeros(7)
 
 uptick = 0
 
-
 def checkCollision():
     if player.collidelist(obstacles) >=0 :
         return True
@@ -143,6 +142,9 @@ while run:
         uptick += 1
         if uptick >= 10:
             uptick = 0
+
+### TODO: movement handler with tick system
+            
 
     if key[pg.K_DOWN] == True:
         player.move_ip(0, 1)
