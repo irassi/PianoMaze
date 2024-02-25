@@ -3,6 +3,7 @@ import random
 import numpy as np
 
 pg.init()
+pg.mixer.init()
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -76,9 +77,8 @@ for i in range(keys_amount):
         bkeys.append(bkey)
 
 
-
-
 #Keyboard
+#TODO: Maybe I should divide "keysAmount" to 12 key sets and store wkey and bkeys in the same list?
 key_bindings = np.zeros(7)
 key_bindings[0] = pg.K_d
 key_bindings[1] = pg.K_f
@@ -88,6 +88,17 @@ key_bindings[4] = pg.K_j
 key_bindings[5] = pg.K_k
 key_bindings[6] = pg.K_l
 piano_keys_pressed = np.zeros(7)
+
+sounds=[]
+soundStart = 40
+for i in range(keys_amount):
+    soundID = soundStart + i
+    #for white keys
+    if soundID  not in [1, 3, 6, 8, 10]:
+        soundPath = r"C:\Projects\PianoMaze\Sounds\piano-ff-0{}.wav".format(soundID)
+        sounds.append(soundPath)
+
+
 
 def handle_movement(direction):
     
@@ -134,6 +145,8 @@ while run:
             for i, key in enumerate(key_bindings):
                 if event.key == key:
                     piano_keys_pressed[i] = 1
+                    sound = pg.mixer.Sound(sounds[i])  # Load the sound
+                    sound.play()  # Play the sound
         
         if event.type == pg.KEYUP:
             for i, key in enumerate(key_bindings):
@@ -181,7 +194,6 @@ while run:
 
     if key[pg.K_LEFT] == True:
         handle_movement("left")
-
     
     if key[pg.K_RIGHT] == True:
         handle_movement("right")
@@ -201,4 +213,3 @@ while run:
     pg.display.flip()
 
 pg.quit()
-
