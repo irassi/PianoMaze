@@ -30,7 +30,6 @@ tile_size = 25
 play_bg = pg.Rect(0, 0, PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT)
 play_area = pg.Surface((PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT))
 ui_area = pg.Surface((WINDOW_WIDTH, WINDOW_HEIGHT - PLAY_AREA_HEIGHT))
-player = pg.Rect(0, 0, tile_size, tile_size)
 
 #light and darkness
 radius = 50
@@ -41,16 +40,55 @@ pg.draw.circle(cover_surf, (255, 255, 255), (radius, radius), radius)
 
 maze = []
 maze = np.zeros((np.int8(PLAY_AREA_WIDTH/tile_size), np.int8(PLAY_AREA_HEIGHT/tile_size)), dtype=np.int8)
-for idx, x in enumerate(maze):
-    for idy, y in enumerate(x):
-        maze[idx, idy] = np.int8(random.randint(0,3)/3)
-    
+# this is for randomizing a level design
+# for idx, x in enumerate(maze):
+#     for idy, y in enumerate(x):
+#         maze[idx, idy] = np.int8(random.randint(0,3)/3)
+
+# this is for a fixed level design
+# width 32, height 18
+# 0 = empty, 1 = obstacle, 2 = start, 3 = end
+
+# Used rot90 here since the level was wrong way around, now it's still mirrored...
+maze = np.rot90([
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+])
+
+
 obstacles = []
 for idx, x in enumerate(maze):
     for idy, y in enumerate(x):
         if y == 1:
             obstacle = pg.Rect(idx*tile_size, idy*tile_size, tile_size, tile_size)
             obstacles.append(obstacle)
+        if y == 2:
+            player_start_point = (idx, idy)
+        if y == 3:
+            end_point = (idx, idy)
+
+# player = pg.Rect(0, 0, tile_size, tile_size)
+
+# spawn player in start point
+
+player = pg.Rect(player_start_point[0]*tile_size, player_start_point[1]*tile_size, tile_size, tile_size)   
+finish = pg.Rect(end_point[0]*tile_size, end_point[1]*tile_size, tile_size, tile_size)
     
 # Draw the piano keys
 wkeys = []
@@ -173,6 +211,9 @@ while run:
     #draw obstacles
     for obstacle in obstacles:
         pg.draw.rect(play_area, BLUE, obstacle)
+
+    #draw finish
+    pg.draw.rect(play_area, RED, finish)
 
     #draw UI
 
