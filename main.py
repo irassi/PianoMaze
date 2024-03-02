@@ -89,7 +89,7 @@ for idx, x in enumerate(maze):
 # spawn player in start point
 
 player = pg.Rect(player_start_point[0]*tile_size, player_start_point[1]*tile_size, tile_size, tile_size)   
-finish = pg.Rect(end_point[0]*tile_size, end_point[1]*tile_size, tile_size, tile_size)
+goal = pg.Rect(end_point[0]*tile_size, end_point[1]*tile_size, tile_size, tile_size)
     
 # Draw the piano keys
 wkeys = []
@@ -214,7 +214,7 @@ while run:
         pg.draw.rect(play_area, BLUE, obstacle)
 
     #draw finish
-    pg.draw.rect(play_area, RED, finish)
+    pg.draw.rect(play_area, RED, goal)
 
     #draw UI
 

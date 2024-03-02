@@ -14,4 +14,6 @@
 
 * more level designs
 
-* figure out how to handle more than 4 movements 
+* figure out how to handle more than 4 movements
+
+* finish level by reaching goal
