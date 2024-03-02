@@ -73,6 +73,8 @@ maze = np.rot90([
 
 
 obstacles = []
+
+#this loop places the ingame objects in the level design
 for idx, x in enumerate(maze):
     for idy, y in enumerate(x):
         if y == 1:
@@ -83,7 +85,6 @@ for idx, x in enumerate(maze):
         if y == 3:
             end_point = (idx, idy)
 
-# player = pg.Rect(0, 0, tile_size, tile_size)
 
 # spawn player in start point
 

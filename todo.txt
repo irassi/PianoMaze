@@ -1,0 +1,17 @@
+*feature
+
+-bug
+
+- the "tuning" seems incorrect, the keys don't correspond to the right notes
+
+- level is mirrored
+
+* implement controls to piano keys instead of arrows
+
+* import level design from text file etc
+
+* UI for starting and selecting a level
+
+* more level designs
+
+* figure out how to handle more than 4 movements 
